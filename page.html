@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html ng-app='application'>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js" defer></script>
+  <script src="js/ang.js" defer></script>
+  <script src="js/script.js" defer></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body ng-controller="appController">
+  <div class="wrapper">
+    <table>
+      <tr>
+        <td id="td1">
+          <h2>Search & Edit</h2>
+          <div class="select" data-toggle="select-open" data-select>
+            <span>{{currentLang.string}}</span>
+            <ul>
+              <li ng-repeat="lang in allLanguages" ng-click="changeLanguage($index)">{{lang}}</li>
+            </ul>
+          </div>
+          <input type="text" placeholder="Search" ng-model="search.str"><br>
+          <div class="container labels">
+            <label for="rd1"><input type="radio" id="rd1" name="rd1" ng-model="search.by" value="msgid"><span></span>Name</label>
+            <label for="rd2"><input type="radio" id="rd2" name="rd1" ng-model="search.by" value="msgstr"><span></span>Text</label>
+          </div>
+        </td>
+        <td rowspan="2" id="td2">
+          <div class="items">
+            <div class="item" data-toggle="item-open" ng-repeat="item in allData[currentLang.number].fileContent | customSearch:search"><a class="del" ng-click="deleteLine($index)">x</a>{{item.msgid}}<textarea name="" ng-model="item.msgstr"></textarea>
+            </div>
+          </div>
+          <input type="submit" value="Save on site" class="alt-back">
+        </td>
+      </tr>
+      <tr>
+        <td id="td3">
+          <h2>Add new line</h2>
+          <form ng-submit="addLine()">
+            <input type="text" placeholder="Line name" ng-model="newLineName" ng-trim required><br>
+            <input type="submit" value="Add" class="alt-back">
+          </form>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

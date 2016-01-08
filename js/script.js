@@ -3,7 +3,7 @@
 function clickListen(event){
   var targ = event.target;
   while(!targ.hasAttribute('data-toggle') && !targ.hasAttribute('data-toggle')){
-    if(targ.tagName == "INPUT" || targ.tagName == "SELECT" || targ.tagName == "TEXTAREA" || targ.tagName == "A") return
+    if(targ.tagName == "INPUT" || targ.tagName == "SELECT" || targ.tagName == "TEXTAREA" || targ.tagName == "A") return;
     if(targ == document.body){
       var toggles = document.querySelectorAll('[data-toggle]');
       for(var i = 0; i < toggles.length; i++){

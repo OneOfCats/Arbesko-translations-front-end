@@ -1,61 +1,37 @@
 ﻿var app = angular.module('application', []);
-app.controller('appController', ['$scope', function($scope){
-  //Array with data from files
-  $scope.allData = [
-    {
-      fileName: 'en_EN.po',
-      language: 'English',
-      fileContent: [
-        {
-          msgid: 'some text',
-          msgstr: ''
-        },
-        {
-          msgid: 'some text 1',
-          msgstr: ''
-        },
-        {
-          msgid: 'some text 2',
-          msgstr: ''
-        },
-        {
-          msgid: 'some text 3',
-          msgstr: ''
-        }
-      ]
-    },
-    {
-      fileName: 'sw_SW.po',
-      language: 'Swedish',
-      fileContent: [
-        {
-          msgid: 'some text',
-          msgstr: 'Swedish translation'
-        },
-        {
-          msgid: 'some text 1',
-          msgstr: 'Swedish translation 1'
-        },
-        {
-          msgid: 'some text 2',
-          msgstr: 'Swedish translation 2'
-        },
-        {
-          msgid: 'some text 3',
-          msgstr: 'Swedish translation 3'
-        }
-      ]
+
+app.controller('appController', ['$scope', 'dataInOut', function($scope, dataInOut){
+  //Attaching the data-object in scope to the data-object in dataInOut service
+  $scope.allData = dataInOut.dataObject;
+  //Get http promice object
+  var httpGetLocales = dataInOut.getLocales();
+  var httpGetTranslations;
+  //Create the languages array and set the default language when http request is completed
+  httpGetLocales.then(function(data){
+    //A list of languages
+    $scope.allLanguages = new Array();
+    for(var i = 0; i < $scope.allData.length; i++){
+      $scope.allLanguages.push($scope.allData[i].language);
     }
-  ];
-  //A list of languages
-  $scope.allLanguages = new Array();
-  for(var i = 0; i < $scope.allData.length; i++){
-    $scope.allLanguages.push($scope.allData[i].language);
-  }
-  //Current language and it's index
-  $scope.currentLang = {string: 'English', number: 0};
+    //Current language and it's index
+    $scope.currentLang = {string: $scope.allData[0]['language'], number: 0};
+  }).finally(function(){
+    httpGetTranslations = dataInOut.getTranslations();
+  });
   //Object for searching filter: searching string, searching field
   $scope.search = {str: '', by: ''};
+  //Order by
+  $scope.orderByString = 'name';
+
+  $scope.changeOrder = function(string){
+    if($scope.orderByString[0] == '-'){
+      $scope.orderByString = string;
+    }else if($scope.orderByString == string){
+      $scope.orderByString = '-' + string;
+    }else{
+      $scope.orderByString = string;
+    }
+  };
 
   $scope.changeLanguage = function($index){
     $scope.currentLang.string = $scope.allLanguages[$index];
@@ -74,7 +50,12 @@ app.controller('appController', ['$scope', function($scope){
     }
     $scope.newLineName = '';
   };
+
+  $scope.saveRequest = function(){
+    dataInOut.sendTranslations();
+  };
 }]);
+
 //Searches for lines that match the data from the search object
 app.filter('customSearch', function(){
   return function(objects, search){
@@ -89,14 +70,58 @@ app.filter('customSearch', function(){
   };
 });
 
-/*
-app.directive('required', function(){
-  return {
-    require: 'ngModel',
-    restrict: '',
-    link: function(scope, elm, attrs, ctrl){
-      if(elm.value.length == 0 && scope.)
+app.factory('dataInOut', ['$http', function(http){
+  var self = this;
+  self.dataObject = [];
+
+  self.getLocales = function getLocales(){
+    var httpData;
+    return http({method: 'GET', url: '/locales.json'})
+        .then(initDataObject);
+    function initDataObject(response){
+      httpData = response.data['locales'];
+      for(var i = 0; i < httpData.length; i++){
+        self.dataObject.push({fileName: httpData[i], language: httpData[i]});
+        self.dataObject[self.dataObject.length - 1].fileContent = new Array();
+      }
+      response = self.dataObject;
+      return response;
+    };
+  };
+
+  self.getTranslations = function getTranslations(locale){
+    if(locale){
+      for(var i = 0; i < self.dataObject.length; i++){
+        if(self.dataObject[i].fileName == locale){
+          var httpData;
+          return http({method: 'GET', url: '/locales/' + locale + '.json'})
+            .then(function(response){
+              self.dataObject[i].fileContent = response.data;
+            });
+        }
+      }
+    }else{
+      var queries = new Array();
+      for(var i = 0; i < self.dataObject.length; i++){
+        makeLoopQuery(i);
+      }
+      return queries;
+      function makeLoopQuery(i){ //To make an isolated closure and save the i value for every iteration
+        queries.push(http({method: 'GET', url: '/locals/' + self.dataObject[i].fileName + '.json'})
+          .then(function httpSuccess(response){
+            self.dataObject[i].fileContent = response.data;
+          }));
+      }
     }
   };
-});
-*/
+
+  self.sendTranslations = function sendTranslations(){
+    var queries = new Array();
+    for(var i = 0; i < self.dataObject.length; i++){
+      queries.push(http.put('locales/' + self.dataObject[i].fileName + '.json', self.dataObject[i].fileContent));
+    }
+    return queries;
+  };
+
+  return self;
+}]);

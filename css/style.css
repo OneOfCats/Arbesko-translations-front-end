@@ -68,6 +68,7 @@ table td{
 }
 table td:first-child{
 	width: 43%;
+	height: 50%;
 }
 #td1{
 	min-height: 300px;
@@ -165,6 +166,27 @@ label{
 	width: 100%;
 	content: "";
 }
+.sort_buttons{
+	width: 100.5%;
+	margin-top: 10px;
+}
+.sort_buttons a{
+	display: inline-block;
+	width: 50%;
+	padding: 6px 0;
+	text-align: center;
+	background: #0da4d5;
+	font-weight: bold;
+}
+.sort_buttons a:hover{
+	background: #00b0e9;
+}
+.sort_buttons a:first-child{
+	background: #5dbad7;
+}
+.sort_buttons a:first-child:hover{
+	background: #44bce2;
+}
 .items{
 	display: inline-block;
 	overflow-y: scroll;
@@ -173,7 +195,7 @@ label{
 	padding: 18px 12px 18px 0;
 	text-align: left;
 	background: #43464c;
-	margin: 10px 0 20px;
+	margin: 0 0 20px;
 }
 .item{
 	background: url(../img/list.png) 10px 3px no-repeat;
@@ -203,7 +225,7 @@ label{
     transition: all 0.1s linear;
 }
 .item.item-open textarea{
-	height: 30px;
+	height: auto;
 	padding: 10px;
 	margin: 10px 0 22px 0;
 }

@@ -76,7 +76,7 @@ app.factory('dataInOut', ['$http', function(http){
 
   self.getLocales = function getLocales(){
     var httpData;
-    return http({method: 'GET', url: 'http://translations.arbesko.com/locales/'})
+    return http({method: 'GET', url: '/locales'})
         .then(initDataObject);
     function initDataObject(response){
       httpData = response.data['locales'];
@@ -93,8 +93,9 @@ app.factory('dataInOut', ['$http', function(http){
     if(locale){
       for(var i = 0; i < self.dataObject.length; i++){
         if(self.dataObject[i].fileName == locale){
-          return http({method: 'GET', url: 'http://translations.arbesko.com/locales/' + locale})
-            .then(function httpSuccess(response){
+          var httpData;
+          return http({method: 'GET', url: '/locales/' + locale})
+            .then(function(response){
               self.dataObject[i].fileContent = response.data;
             });
         }
@@ -106,7 +107,7 @@ app.factory('dataInOut', ['$http', function(http){
       }
       return queries;
       function makeLoopQuery(i){ //To make an isolated closure and save the i value for every iteration
-        queries.push(http({method: 'GET', url: 'http://translations.arbesko.com/locales/' + self.dataObject[i].fileName})
+        queries.push(http({method: 'GET', url: '/locals/' + self.dataObject[i].fileName})
           .then(function httpSuccess(response){
             self.dataObject[i].fileContent = response.data;
           }));
@@ -117,12 +118,9 @@ app.factory('dataInOut', ['$http', function(http){
   self.sendTranslations = function sendTranslations(){
     var queries = new Array();
     for(var i = 0; i < self.dataObject.length; i++){
-      makeLoopQuery(i);
+      queries.push(http.put('locales/' + self.dataObject[i].fileName, self.dataObject[i].fileContent));
     }
     return queries;
-    function makeLoopQuery(i){
-      queries.push(http.put('http://translations.arbesko.com/locales/' + self.dataObject[i].fileName, self.dataObject[i].fileContent));
-    }
   };
 
   return self;
